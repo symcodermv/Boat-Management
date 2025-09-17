@@ -1,0 +1,824 @@
+
+  /* Custom font for the header */
+        @font-face {
+            font-family: 'SameeAvasThaana';
+            src: url('fonts/Samee_Avas_Thaana.ttf');
+        }
+        
+        /* Splash Screen Styles */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .splash-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+        
+        .splash-logo i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .splash-logo h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            font-family: 'SameeAvasThaana', sans-serif;
+        }
+        
+        .splash-logo p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .progress-bar {
+            width: 80%;
+            max-width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: white;
+            border-radius: 3px;
+            transition: width 2s ease-in-out;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Main App Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        header {
+            background: #1a2a6c;
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+        
+        .logo i {
+            font-size: 2.2rem;
+            margin-right: 8px;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            font-family: 'SameeAvasThaana', sans-serif;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #0d1b4b;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tab {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #fff;
+            transition: all 0.3s;
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            background: #fdbb2d;
+            color: #1a2a6c;
+        }
+        
+        .tab:hover:not(.active) {
+            background: #2a3b7c;
+        }
+        
+        .content {
+            padding: 15px;
+        }
+        
+        .form-section {
+            display: block;
+        }
+        
+        .pos-section, .island-section, .payment-section {
+            display: none;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -5px 10px;
+        }
+        
+        .form-group {
+            flex: 1 0 100%;
+            margin: 0 5px 12px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #1a2a6c;
+            font-size: 13px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        .product-details {
+            background: #f5f7ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .product-header {
+            display: none;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #1a2a6c;
+            padding: 0 5px;
+            font-size: 13px;
+        }
+        
+        .product-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .product-name {
+            flex: 1 0 100%;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-unit {
+            flex: 1;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-qty {
+            flex: 1;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-price {
+            flex: 1;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-desc {
+            flex: 1 0 100%;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-actions {
+            flex: 1;
+            padding: 0 5px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .btn {
+            padding: 10px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #1a2a6c;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2a3b7c;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-sm {
+            padding: 6px 8px;
+            font-size: 12px;
+        }
+        
+        .btn-xs {
+            padding: 4px 6px;
+            font-size: 11px;
+        }
+        
+        .payment-status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .payment-status label {
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .payment-status input {
+            width: auto;
+            margin-right: 5px;
+        }
+        
+        .status-radio {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .actions {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        /* Island Management Styles */
+        .island-management {
+            background: #f5f7ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .island-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .island-form input {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .island-list {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .island-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        
+        .island-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* POS System Styles */
+        .island-selector {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .island-selector select {
+            max-width: 100%;
+            margin: 0 auto 10px;
+        }
+        
+        .search-container {
+            margin-bottom: 15px;
+        }
+        
+        .search-container input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .pos-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .trip-list {
+            flex: 1;
+            min-width: 100%;
+            background: #f5f7ff;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .trip-card {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .trip-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .trip-card.selected {
+            border: 2px solid #1a2a6c;
+            background: #e6e9ff;
+        }
+        
+        .trip-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .trip-island {
+            font-weight: bold;
+            color: #1a2a6c;
+            font-size: 14px;
+        }
+        
+        .trip-date {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .trip-customer {
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        
+        .trip-products {
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+            font-size: 12px;
+        }
+        
+        .trip-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed #ddd;
+            flex-wrap: wrap;
+        }
+        
+        .trip-status {
+            padding: 3px 6px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-unpaid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .trip-amount {
+            font-weight: bold;
+            color: #1a2a6c;
+            font-size: 14px;
+        }
+        
+        .trip-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .invoice-preview {
+            flex: 1;
+            min-width: 100%;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .invoice-products {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 12px;
+            min-width: 500px;
+        }
+        
+        .invoice-products th {
+            background: #f5f7ff;
+            padding: 8px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            font-size: 12px;
+        }
+        
+        .invoice-products td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
+        
+        .invoice-total {
+            text-align: right;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f5f7ff;
+            border-radius: 6px;
+        }
+        
+        .invoice-actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .bank-details {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        /* Payment Management Styles */
+        .payment-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .payment-filter {
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+        
+        .payment-filter.active {
+            background: #1a2a6c;
+            color: white;
+        }
+        
+        .payment-filter:hover:not(.active) {
+            background: #2a3b7c;
+            color: white;
+        }
+        
+        .payment-list {
+            background: #f5f7ff;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .payment-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .payment-info {
+            flex: 2;
+            margin-bottom: 8px;
+        }
+        
+        .payment-amount {
+            flex: 1;
+            text-align: right;
+            font-weight: bold;
+            font-size: 14px;
+            color: #1a2a6c;
+            margin-bottom: 8px;
+        }
+        
+        .payment-actions {
+            flex: 1;
+            text-align: right;
+        }
+        
+        /* Combined Invoice Styles */
+        .combined-invoice {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f7ff;
+            border-radius: 8px;
+        }
+        
+        .customer-selector {
+            margin-bottom: 15px;
+        }
+        
+        .customer-selector select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        
+        .combined-invoice-actions {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        /* Mobile-specific styles */
+        .mobile-product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .mobile-product-row {
+            display: contents;
+        }
+        
+        /* Mobile invoice styles */
+        @media (max-width: 767px) {
+            .invoice-products th:nth-child(4),
+            .invoice-products td:nth-child(4) {
+                display: none;
+            }
+            
+            .invoice-products th:nth-child(4)::before {
+                content: "Boat Naalu";
+                display: table-cell;
+            }
+            
+            .invoice-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .invoice-actions .btn {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+        }
+        
+        /* Print styles for invoice */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .invoice-preview, .invoice-preview * {
+                visibility: visible;
+            }
+            .invoice-preview {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+            }
+            .invoice-actions {
+                display: none;
+            }
+        }
+        
+        /* Media queries for larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 15px;
+                font-size: 16px;
+            }
+            
+            .container {
+                max-width: 95%;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            .logo i {
+                font-size: 3rem;
+            }
+            
+            h1 {
+                font-size: 2.8rem;
+            }
+            
+            .tab {
+                font-size: 14px;
+                padding: 12px 15px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .form-group {
+                flex: 1 0 calc(50% - 10px);
+            }
+            
+            .product-header {
+                display: flex;
+            }
+            
+            .product-name, .product-unit, .product-qty, .product-price, .product-desc, .product-actions {
+                margin-bottom: 0;
+                flex: 1;
+            }
+            
+            .product-name {
+                flex: 2;
+            }
+            
+            .product-desc {
+                flex: 2;
+            }
+            
+            .trip-list, .invoice-preview {
+                min-width: calc(50% - 8px);
+            }
+            
+            .payment-info, .payment-amount, .payment-actions {
+                margin-bottom: 0;
+            }
+            
+            .mobile-product-grid {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1300px;
+            }
+            
+            .form-group {
+                flex: 1 0 calc(33.333% - 10px);
+            }
+        }
+        
+        /* Total trips value display */
+        .total-trips-value {
+            background: #1a2a6c;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
