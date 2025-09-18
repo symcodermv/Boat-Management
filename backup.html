@@ -1,0 +1,1946 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boat Trip Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <!-- Firebase Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        /* Custom font for the header */
+        @font-face {
+            font-family: 'SameeAvasThaana';
+            src: url('fonts/Samee_Avas_Thaana.ttf');
+        }
+        
+        /* Splash Screen Styles */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .splash-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+        
+        .splash-logo i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .splash-logo h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            font-family: 'SameeAvasThaana', sans-serif;
+        }
+        
+        .splash-logo p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .progress-bar {
+            width: 80%;
+            max-width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: white;
+            border-radius: 3px;
+            transition: width 2s ease-in-out;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Main App Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        header {
+            background: #1a2a6c;
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+        
+        .logo i {
+            font-size: 2.2rem;
+            margin-right: 8px;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            font-family: 'SameeAvasThaana', sans-serif;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #0d1b4b;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tab {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #fff;
+            transition: all 0.3s;
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            background: #fdbb2d;
+            color: #1a2a6c;
+        }
+        
+        .tab:hover:not(.active) {
+            background: #2a3b7c;
+        }
+        
+        .content {
+            padding: 15px;
+        }
+        
+        .form-section, .pos-section, .island-section, .payment-section, .product-section {
+            display: none;
+        }
+        
+        .form-section.active, .pos-section.active, .island-section.active, .payment-section.active, .product-section.active {
+            display: block;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -5px 10px;
+        }
+        
+        .form-group {
+            flex: 1 0 100%;
+            margin: 0 5px 12px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #1a2a6c;
+            font-size: 13px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        .product-details {
+            background: #f5f7ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .product-header {
+            display: none;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #1a2a6c;
+            padding: 0 5px;
+            font-size: 13px;
+        }
+        
+        .product-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .product-name {
+            flex: 1 0 100%;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-unit {
+            flex: 1;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-qty {
+            flex: 1;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-price {
+            flex: 1;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-desc {
+            flex: 1 0 100%;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .product-actions {
+            flex: 1;
+            padding: 0 5px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .btn {
+            padding: 10px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #1a2a6c;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2a3b7c;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-sm {
+            padding: 6px 8px;
+            font-size: 12px;
+        }
+        
+        .btn-xs {
+            padding: 4px 6px;
+            font-size: 11px;
+        }
+        
+        .payment-status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .payment-status label {
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .payment-status input {
+            width: auto;
+            margin-right: 5px;
+        }
+        
+        .status-radio {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .actions {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        /* Island Management Styles */
+        .island-management, .product-management {
+            background: #f5f7ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .island-form, .product-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .island-form input, .product-form input {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .island-list, .product-list {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .island-item, .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        
+        .island-item:last-child, .product-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* POS System Styles */
+        .island-selector {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .island-selector select {
+            max-width: 100%;
+            margin: 0 auto 10px;
+        }
+        
+        .search-container {
+            margin-bottom: 15px;
+        }
+        
+        .search-container input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .pos-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .trip-list {
+            flex: 1;
+            min-width: 100%;
+            background: #f5f7ff;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .trip-card {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .trip-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .trip-card.selected {
+            border: 2px solid #1a2a6c;
+            background: #e6e9ff;
+        }
+        
+        .trip-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .trip-island {
+            font-weight: bold;
+            color: #1a2a6c;
+            font-size: 14px;
+        }
+        
+        .trip-date {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .trip-customer {
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        
+        .trip-products {
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+            font-size: 12px;
+        }
+        
+        .trip-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed #ddd;
+            flex-wrap: wrap;
+        }
+        
+        .trip-status {
+            padding: 3px 6px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-unpaid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .trip-amount {
+            font-weight: bold;
+            color: #1a2a6c;
+            font-size: 14px;
+        }
+        
+        .trip-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .invoice-preview {
+            flex: 1;
+            min-width: 100%;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .invoice-products {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 12px;
+            min-width: 500px;
+        }
+        
+        .invoice-products th {
+            background: #f5f7ff;
+            padding: 8px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            font-size: 12px;
+        }
+        
+        .invoice-products td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
+        
+        .invoice-total {
+            text-align: right;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f5f7ff;
+            border-radius: 6px;
+        }
+        
+        .invoice-actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .bank-details {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        /* Payment Management Styles */
+        .payment-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .payment-filter {
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+        
+        .payment-filter.active {
+            background: #1a2a6c;
+            color: white;
+        }
+        
+        .payment-filter:hover:not(.active) {
+            background: #2a3b7c;
+            color: white;
+        }
+        
+        .payment-list {
+            background: #f5f7ff;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .payment-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .payment-info {
+            flex: 2;
+            margin-bottom: 8px;
+        }
+        
+        .payment-amount {
+            flex: 1;
+            text-align: right;
+            font-weight: bold;
+            font-size: 14px;
+            color: #1a2a6c;
+            margin-bottom: 8px;
+        }
+        
+        .payment-actions {
+            flex: 1;
+            text-align: right;
+        }
+        
+        /* Customer Registration Form */
+        .customer-registration {
+            background: #f5f7ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        /* Customer List Styles */
+        .customer-list {
+            margin-top: 20px;
+        }
+        
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .customer-table th, .customer-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .customer-table th {
+            background-color: #1a2a6c;
+            color: white;
+        }
+        
+        .customer-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 8px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Mobile-specific styles */
+        .mobile-product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .mobile-product-row {
+            display: contents;
+        }
+        
+        /* Mobile invoice styles */
+        @media (max-width: 767px) {
+            .invoice-products th:nth-child(4),
+            .invoice-products td:nth-child(4) {
+                display: none;
+            }
+            
+            .invoice-products th:nth-child(4)::before {
+                content: "Boat Naalu";
+                display: table-cell;
+            }
+            
+            .invoice-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .invoice-actions .btn {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            
+            .customer-table {
+                font-size: 12px;
+            }
+            
+            .customer-table th, .customer-table td {
+                padding: 6px;
+            }
+        }
+        
+        /* Print styles for invoice */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .invoice-preview, .invoice-preview * {
+                visibility: visible;
+            }
+            .invoice-preview {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+            }
+            .invoice-actions {
+                display: none;
+            }
+        }
+        
+        /* Media queries for larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 15px;
+                font-size: 16px;
+            }
+            
+            .container {
+                max-width: 95%;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            .logo i {
+                font-size: 3rem;
+            }
+            
+            h1 {
+                font-size: 2.8rem;
+            }
+            
+            .tab {
+                font-size: 14px;
+                padding: 12px 15px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .form-group {
+                flex: 1 0 calc(50% - 10px);
+            }
+            
+            .product-header {
+                display: flex;
+            }
+            
+            .product-name, .product-unit, .product-qty, .product-price, .product-desc, .product-actions {
+                margin-bottom: 0;
+                flex: 1;
+            }
+            
+            .product-name {
+                flex: 2;
+            }
+            
+            .product-desc {
+                flex: 2;
+            }
+            
+            .trip-list, .invoice-preview {
+                min-width: calc(50% - 8px);
+            }
+            
+            .payment-info, .payment-amount, .payment-actions {
+                margin-bottom: 0;
+            }
+            
+            .mobile-product-grid {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1300px;
+            }
+            
+            .form-group {
+                flex: 1 0 calc(33.333% - 10px);
+            }
+        }
+        
+        /* Total trips value display */
+        .total-trips-value {
+            background: #1a2a6c;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="splash-logo">
+            <i class="fas fa-ship"></i>
+            <h1>qTOb amAyin</h1>
+            <p>Boat Trip Management System</p>
+        </div>
+        <div class="progress-bar">
+            <div class="progress" id="splash-progress"></div>
+        </div>
+    </div>
+    
+    <!-- Main App Container -->
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-ship"></i>
+                <h1>qTOb amAyin</h1>
+            </div>
+            <p>Manage your boat trips, customers, and invoices in one place</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="form">Entry Form</div>
+            <div class="tab" data-tab="pos">POS System</div>
+            <div class="tab" data-tab="island">Island Management</div>
+            <div class="tab" data-tab="product">Product Management</div>
+            <div class="tab" data-tab="payment">Payment Management</div>
+        </div>
+        
+        <div class="content">
+            <!-- Entry Form Section -->
+            <div class="form-section active" id="form-section">
+                <div class="island-selector">
+                    <label for="island">Select Island</label>
+                    <select id="island" required>
+                        <option value="">Select an island</option>
+                        <!-- Islands will be loaded from Firebase -->
+                    </select>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn btn-primary" id="register-customer-btn">Register Customer</button>
+                </div>
+                
+                <!-- Customer Registration Form (Initially Hidden) -->
+                <div class="customer-registration" id="customer-registration" style="display: none;">
+                    <h3>Customer Registration</h3>
+                    <form id="customer-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="customer-name">Customer/Business Name</label>
+                                <input type="text" id="customer-name" placeholder="Enter customer name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact">Contact</label>
+                                <input type="text" id="contact" placeholder="Enter contact number" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="address">Address</label>
+                                <textarea id="address" placeholder="Enter customer address"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="actions">
+                            <button type="submit" class="btn btn-success">Save Customer</button>
+                            <button type="button" class="btn btn-warning" id="add-products-btn">Add Products</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Product Entry Form (Initially Hidden) -->
+                <div class="product-details" id="product-details" style="display: none;">
+                    <h3>Product Details</h3>
+                    <form id="product-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="product-date">Select Date</label>
+                                <input type="date" id="product-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-time">Select Time</label>
+                                <input type="time" id="product-time" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="product-select">Select Product</label>
+                                <select id="product-select" required>
+                                    <option value="">Select a product</option>
+                                    <!-- Products will be loaded from Firebase -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-qty-input">Quantity</label>
+                                <input type="number" id="product-qty-input" placeholder="Quantity" min="1" value="1" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="product-desc-input">Description (Optional)</label>
+                                <textarea id="product-desc-input" placeholder="Product description"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="actions">
+                            <button type="submit" class="btn btn-success">Add Product</button>
+                            <button type="button" class="btn btn-primary" id="finish-order-btn">Finish Order</button>
+                        </div>
+                    </form>
+                    
+                    <div class="product-list-table" id="product-list-table" style="margin-top: 20px; display: none;">
+                        <h4>Added Products</h4>
+                        <table class="customer-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Description</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="added-products-table">
+                                <!-- Added products will be listed here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- POS System Section -->
+            <div class="pos-section" id="pos-section">
+                <div class="island-selector">
+                    <label for="pos-island">Select Island to View Customers:</label>
+                    <select id="pos-island">
+                        <option value="all">All Islands</option>
+                        <!-- Islands will be loaded from Firebase -->
+                    </select>
+                </div>
+                
+                <div class="search-container">
+                    <input type="text" id="search-customers" placeholder="Search by customer name or contact...">
+                </div>
+                
+                <div class="customer-list" id="customer-list">
+                    <h3>Customers</h3>
+                    <table class="customer-table">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Contact</th>
+                                <th>Island</th>
+                                <th>Orders</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customer-table-body">
+                            <!-- Customers will be listed here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Customer Orders Modal -->
+                <div id="customer-orders-modal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h2 id="modal-customer-name">Customer Orders</h2>
+                        <div id="customer-orders-list">
+                            <!-- Customer orders will be listed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Island Management Section -->
+            <div class="island-section" id="island-section">
+                <h2>Island Management</h2>
+                <p>Add and remove islands for your boat trips</p>
+                
+                <div class="island-management">
+                    <div class="island-form">
+                        <input type="text" id="new-island" placeholder="Enter new island name">
+                        <button class="btn btn-primary" id="add-island"><i class="fas fa-plus"></i> Add Island</button>
+                    </div>
+                    
+                    <div class="island-list" id="island-list">
+                        <h3>Available Islands</h3>
+                        <!-- Islands will be listed here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product Management Section -->
+            <div class="product-section" id="product-section">
+                <h2>Product Management</h2>
+                <p>Add and remove products for your boat trips</p>
+                
+                <div class="product-management">
+                    <div class="product-form">
+                        <input type="text" id="new-product" placeholder="Enter new product name">
+                        <button class="btn btn-primary" id="add-product"><i class="fas fa-plus"></i> Add Product</button>
+                    </div>
+                    
+                    <div class="product-list" id="product-list">
+                        <h3>Available Products</h3>
+                        <!-- Products will be listed here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Management Section -->
+            <div class="payment-section" id="payment-section">
+                <h2>Payment Management</h2>
+                <p>View and manage payments for your boat trips</p>
+                
+                <div class="payment-filters">
+                    <div class="payment-filter active" data-filter="all">All Payments</div>
+                    <div class="payment-filter" data-filter="paid">Paid</div>
+                    <div class="payment-filter" data-filter="unpaid">Unpaid</div>
+                </div>
+                
+                <div class="payment-list" id="payment-list">
+                    <!-- Payment items will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize jsPDF
+        window.jsPDF = window.jspdf.jsPDF;
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyipnhQ_PhDyTD490RgshfgSpioXq37eA",
+            authDomain: "boatmanagementsystem-5ffba.firebaseapp.com",
+            databaseURL: "https://boatmanagementsystem-5ffba-default-rtdb.firebaseio.com",
+            projectId: "boatmanagementsystem-5ffba",
+            storageBucket: "boatmanagementsystem-5ffba.firebasestorage.app",
+            messagingSenderId: "4668108280",
+            appId: "1:4668108280:web:b8c0504ccf7a4df2c17a0d",
+            measurementId: "G-WZ1LGR0W5Z"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global variables
+        let currentCustomerId = null;
+        let currentIsland = null;
+        let customerProducts = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show splash screen first
+            const splashScreen = document.getElementById('splash-screen');
+            const progressBar = document.getElementById('splash-progress');
+            const container = document.querySelector('.container');
+            
+            // Simulate loading progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    // Hide splash screen and show main app
+                    splashScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        splashScreen.style.display = 'none';
+                        container.style.opacity = '1';
+                        container.style.transform = 'translateY(0)';
+                        
+                        // Initialize data after splash screen
+                        initializeData();
+                    }, 500);
+                }
+            }, 100);
+            
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.tab');
+            const formSection = document.getElementById('form-section');
+            const posSection = document.getElementById('pos-section');
+            const islandSection = document.getElementById('island-section');
+            const productSection = document.getElementById('product-section');
+            const paymentSection = document.getElementById('payment-section');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    formSection.classList.remove('active');
+                    posSection.classList.remove('active');
+                    islandSection.classList.remove('active');
+                    productSection.classList.remove('active');
+                    paymentSection.classList.remove('active');
+                    
+                    if (this.dataset.tab === 'form') {
+                        formSection.classList.add('active');
+                    } else if (this.dataset.tab === 'pos') {
+                        posSection.classList.add('active');
+                        loadCustomers();
+                    } else if (this.dataset.tab === 'island') {
+                        islandSection.classList.add('active');
+                        loadIslands();
+                    } else if (this.dataset.tab === 'product') {
+                        productSection.classList.add('active');
+                        loadProducts();
+                    } else if (this.dataset.tab === 'payment') {
+                        paymentSection.classList.add('active');
+                        loadPayments('all');
+                    }
+                });
+            });
+            
+            // Payment filter functionality
+            const paymentFilters = document.querySelectorAll('.payment-filter');
+            paymentFilters.forEach(filter => {
+                filter.addEventListener('click', function() {
+                    paymentFilters.forEach(f => f.classList.remove('active'));
+                    this.classList.add('active');
+                    loadPayments(this.dataset.filter);
+                });
+            });
+            
+            // Register customer button
+            document.getElementById('register-customer-btn').addEventListener('click', function() {
+                const islandSelect = document.getElementById('island');
+                if (!islandSelect.value) {
+                    alert('Please select an island first!');
+                    return;
+                }
+                
+                currentIsland = islandSelect.value;
+                document.getElementById('customer-registration').style.display = 'block';
+            });
+            
+            // Customer form submission
+            document.getElementById('customer-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const customerName = document.getElementById('customer-name').value;
+                const contact = document.getElementById('contact').value;
+                const address = document.getElementById('address').value;
+                
+                if (!customerName || !contact) {
+                    alert('Please fill in all required fields!');
+                    return;
+                }
+                
+                // Create customer object
+                const customer = {
+                    id: Date.now(), // Unique ID
+                    name: customerName,
+                    contact: contact,
+                    address: address,
+                    island: currentIsland
+                };
+                
+                // Save to Firebase
+                saveCustomer(customer);
+                
+                // Store customer ID for product entry
+                currentCustomerId = customer.id;
+                
+                // Show product entry form
+                document.getElementById('product-details').style.display = 'block';
+                
+                alert('Customer saved successfully! Now you can add products.');
+            });
+            
+            // Add products button
+            document.getElementById('add-products-btn').addEventListener('click', function() {
+                document.getElementById('product-details').style.display = 'block';
+            });
+            
+            // Product form submission
+            document.getElementById('product-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!currentCustomerId) {
+                    alert('Please save customer information first!');
+                    return;
+                }
+                
+                const productId = document.getElementById('product-select').value;
+                const productName = document.getElementById('product-select').options[document.getElementById('product-select').selectedIndex].text;
+                const qty = document.getElementById('product-qty-input').value;
+                const description = document.getElementById('product-desc-input').value;
+                const date = document.getElementById('product-date').value;
+                const time = document.getElementById('product-time').value;
+                
+                if (!productId || !qty) {
+                    alert('Please select a product and enter quantity!');
+                    return;
+                }
+                
+                // Add product to the list
+                customerProducts.push({
+                    productId,
+                    productName,
+                    qty,
+                    description,
+                    date,
+                    time
+                });
+                
+                // Update the products table
+                updateProductsTable();
+                
+                // Reset form
+                document.getElementById('product-form').reset();
+                document.getElementById('product-date').valueAsDate = new Date();
+                
+                alert('Product added to order!');
+            });
+            
+            // Finish order button
+            document.getElementById('finish-order-btn').addEventListener('click', function() {
+                if (customerProducts.length === 0) {
+                    alert('Please add at least one product to the order!');
+                    return;
+                }
+                
+                // Create order object
+                const order = {
+                    id: Date.now(), // Unique ID
+                    customerId: currentCustomerId,
+                    products: customerProducts,
+                    date: new Date().toISOString(),
+                    paymentStatus: 'unpaid'
+                };
+                
+                // Save to Firebase
+                saveOrder(order);
+                
+                // Reset forms
+                document.getElementById('customer-form').reset();
+                document.getElementById('product-form').reset();
+                document.getElementById('customer-registration').style.display = 'none';
+                document.getElementById('product-details').style.display = 'none';
+                document.getElementById('product-list-table').style.display = 'none';
+                
+                // Reset variables
+                currentCustomerId = null;
+                currentIsland = null;
+                customerProducts = [];
+                
+                alert('Order saved successfully!');
+            });
+            
+            // Add island functionality
+            document.getElementById('add-island').addEventListener('click', function() {
+                const islandName = document.getElementById('new-island').value.trim();
+                if (islandName) {
+                    addIsland(islandName);
+                    document.getElementById('new-island').value = '';
+                } else {
+                    alert('Please enter an island name!');
+                }
+            });
+            
+            // Add product functionality
+            document.getElementById('add-product').addEventListener('click', function() {
+                const productName = document.getElementById('new-product').value.trim();
+                if (productName) {
+                    addProduct(productName);
+                    document.getElementById('new-product').value = '';
+                } else {
+                    alert('Please enter a product name!');
+                }
+            });
+            
+            // POS Island filter
+            document.getElementById('pos-island').addEventListener('change', loadCustomers);
+            
+            // Search functionality
+            document.getElementById('search-customers').addEventListener('input', function() {
+                loadCustomers(this.value);
+            });
+            
+            // Modal close functionality
+            document.querySelector('.close').addEventListener('click', function() {
+                document.getElementById('customer-orders-modal').style.display = 'none';
+            });
+            
+            // Initialize with today's date
+            document.getElementById('product-date').valueAsDate = new Date();
+            
+            // Data functions
+            function initializeData() {
+                // Load islands and products from Firebase
+                loadIslandsFromFirebase();
+                loadProductsFromFirebase();
+                
+                // Set up real-time listeners
+                database.ref('customers').on('value', () => loadCustomers());
+                database.ref('orders').on('value', () => loadCustomers());
+            }
+            
+            function loadIslandsFromFirebase() {
+                database.ref('islands').once('value').then((snapshot) => {
+                    const islands = snapshot.val();
+                    if (!islands) {
+                        // Add default islands if none exist
+                        const defaultIslands = ['K.Male', 'Dhiggaru', 'Mulah', 'Fuvahmulah'];
+                        database.ref('islands').set(defaultIslands).then(() => {
+                            updateIslandSelects(defaultIslands);
+                        });
+                    } else {
+                        updateIslandSelects(islands);
+                    }
+                });
+            }
+            
+            function loadProductsFromFirebase() {
+                database.ref('products').once('value').then((snapshot) => {
+                    const products = snapshot.val();
+                    if (!products) {
+                        // Add default products if none exist
+                        const defaultProducts = ['Rice', 'Flour', 'Sugar', 'Oil', 'Tea'];
+                        database.ref('products').set(defaultProducts).then(() => {
+                            updateProductSelect(defaultProducts);
+                        });
+                    } else {
+                        updateProductSelect(products);
+                    }
+                });
+            }
+            
+            function updateIslandSelects(islands) {
+                const islandSelect = document.getElementById('island');
+                const posIslandSelect = document.getElementById('pos-island');
+                
+                // Clear existing options except the first one
+                while (islandSelect.options.length > 1) {
+                    islandSelect.remove(1);
+                }
+                
+                while (posIslandSelect.options.length > 1) {
+                    posIslandSelect.remove(1);
+                }
+                
+                // Add islands to selects
+                islands.forEach(island => {
+                    const option = document.createElement('option');
+                    option.value = island;
+                    option.textContent = island;
+                    islandSelect.appendChild(option);
+                    
+                    const posOption = document.createElement('option');
+                    posOption.value = island;
+                    posOption.textContent = island;
+                    posIslandSelect.appendChild(posOption);
+                });
+            }
+            
+            function updateProductSelect(products) {
+                const productSelect = document.getElementById('product-select');
+                
+                // Clear existing options except the first one
+                while (productSelect.options.length > 1) {
+                    productSelect.remove(1);
+                }
+                
+                // Add products to select
+                products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product;
+                    option.textContent = product;
+                    productSelect.appendChild(option);
+                });
+            }
+            
+            function loadIslands() {
+                const islandList = document.getElementById('island-list');
+                
+                database.ref('islands').once('value').then((snapshot) => {
+                    const islands = snapshot.val();
+                    
+                    // Clear current list
+                    islandList.innerHTML = '<h3>Available Islands</h3>';
+                    
+                    if (!islands || islands.length === 0) {
+                        islandList.innerHTML += '<p>No islands added yet.</p>';
+                        return;
+                    }
+                    
+                    // Create island items
+                    islands.forEach(island => {
+                        const islandItem = document.createElement('div');
+                        islandItem.className = 'island-item';
+                        islandItem.innerHTML = `
+                            <div class="island-name">${island}</div>
+                            <button class="btn btn-danger btn-sm delete-island" data-island="${island}"><i class="fas fa-trash"></i> Delete</button>
+                        `;
+                        
+                        islandList.appendChild(islandItem);
+                        
+                        // Add event listener to delete button
+                        islandItem.querySelector('.delete-island').addEventListener('click', function() {
+                            if (confirm(`Are you sure you want to delete ${island}?`)) {
+                                deleteIsland(island);
+                            }
+                        });
+                    });
+                });
+            }
+            
+            function loadProducts() {
+                const productList = document.getElementById('product-list');
+                
+                database.ref('products').once('value').then((snapshot) => {
+                    const products = snapshot.val();
+                    
+                    // Clear current list
+                    productList.innerHTML = '<h3>Available Products</h3>';
+                    
+                    if (!products || products.length === 0) {
+                        productList.innerHTML += '<p>No products added yet.</p>';
+                        return;
+                    }
+                    
+                    // Create product items
+                    products.forEach(product => {
+                        const productItem = document.createElement('div');
+                        productItem.className = 'product-item';
+                        productItem.innerHTML = `
+                            <div class="product-name">${product}</div>
+                            <button class="btn btn-danger btn-sm delete-product" data-product="${product}"><i class="fas fa-trash"></i> Delete</button>
+                        `;
+                        
+                        productList.appendChild(productItem);
+                        
+                        // Add event listener to delete button
+                        productItem.querySelector('.delete-product').addEventListener('click', function() {
+                            if (confirm(`Are you sure you want to delete ${product}?`)) {
+                                deleteProduct(product);
+                            }
+                        });
+                    });
+                });
+            }
+            
+            function addIsland(islandName) {
+                database.ref('islands').once('value').then((snapshot) => {
+                    const islands = snapshot.val() || [];
+                    if (!islands.includes(islandName)) {
+                        islands.push(islandName);
+                        database.ref('islands').set(islands).then(() => {
+                            updateIslandSelects(islands);
+                            loadIslands();
+                            alert('Island added successfully!');
+                        });
+                    } else {
+                        alert('This island already exists!');
+                    }
+                });
+            }
+            
+            function deleteIsland(islandName) {
+                database.ref('islands').once('value').then((snapshot) => {
+                    const islands = snapshot.val();
+                    const updatedIslands = islands.filter(island => island !== islandName);
+                    database.ref('islands').set(updatedIslands).then(() => {
+                        updateIslandSelects(updatedIslands);
+                        loadIslands();
+                        alert('Island deleted successfully!');
+                    });
+                });
+            }
+            
+            function addProduct(productName) {
+                database.ref('products').once('value').then((snapshot) => {
+                    const products = snapshot.val() || [];
+                    if (!products.includes(productName)) {
+                        products.push(productName);
+                        database.ref('products').set(products).then(() => {
+                            updateProductSelect(products);
+                            loadProducts();
+                            alert('Product added successfully!');
+                        });
+                    } else {
+                        alert('This product already exists!');
+                    }
+                });
+            }
+            
+            function deleteProduct(productName) {
+                database.ref('products').once('value').then((snapshot) => {
+                    const products = snapshot.val();
+                    const updatedProducts = products.filter(product => product !== productName);
+                    database.ref('products').set(updatedProducts).then(() => {
+                        updateProductSelect(updatedProducts);
+                        loadProducts();
+                        alert('Product deleted successfully!');
+                    });
+                });
+            }
+            
+            function saveCustomer(customer) {
+                database.ref('customers/' + customer.id).set(customer);
+            }
+            
+            function saveOrder(order) {
+                database.ref('orders/' + order.id).set(order);
+            }
+            
+            function getCustomers(callback) {
+                database.ref('customers').once('value').then((snapshot) => {
+                    const customers = snapshot.val();
+                    const customersArray = customers ? Object.values(customers) : [];
+                    callback(customersArray);
+                });
+            }
+            
+            function getOrders(callback) {
+                database.ref('orders').once('value').then((snapshot) => {
+                    const orders = snapshot.val();
+                    const ordersArray = orders ? Object.values(orders) : [];
+                    callback(ordersArray);
+                });
+            }
+            
+            function getCustomerOrders(customerId, callback) {
+                database.ref('orders').once('value').then((snapshot) => {
+                    const orders = snapshot.val();
+                    const ordersArray = orders ? Object.values(orders) : [];
+                    const customerOrders = ordersArray.filter(order => order.customerId == customerId);
+                    callback(customerOrders);
+                });
+            }
+            
+            function updateProductsTable() {
+                const tableBody = document.getElementById('added-products-table');
+                tableBody.innerHTML = '';
+                
+                customerProducts.forEach((product, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${product.productName}</td>
+                        <td>${product.qty}</td>
+                        <td>${product.description || '-'}</td>
+                        <td>${product.date} ${product.time}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm remove-product" data-index="${index}">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                    
+                    // Add event listener to remove button
+                    row.querySelector('.remove-product').addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        customerProducts.splice(index, 1);
+                        updateProductsTable();
+                    });
+                });
+                
+                document.getElementById('product-list-table').style.display = 'block';
+            }
+            
+            function loadCustomers(searchTerm = '') {
+                const customerTableBody = document.getElementById('customer-table-body');
+                const islandFilter = document.getElementById('pos-island').value;
+                
+                // Clear current table
+                customerTableBody.innerHTML = '';
+                
+                // Get customers and orders from Firebase
+                getCustomers((customers) => {
+                    getOrders((orders) => {
+                        // Filter by island if needed
+                        let filteredCustomers = islandFilter === 'all' 
+                            ? customers 
+                            : customers.filter(customer => customer.island === islandFilter);
+                        
+                        // Filter by search term if provided
+                        if (searchTerm) {
+                            const term = searchTerm.toLowerCase();
+                            filteredCustomers = filteredCustomers.filter(customer => 
+                                customer.name.toLowerCase().includes(term) ||
+                                customer.contact.toLowerCase().includes(term)
+                            );
+                        }
+                        
+                        if (filteredCustomers.length === 0) {
+                            customerTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No customers found.</td></tr>';
+                            return;
+                        }
+                        
+                        // Create customer rows
+                        filteredCustomers.forEach(customer => {
+                            // Count orders for this customer
+                            const customerOrders = orders.filter(order => order.customerId == customer.id);
+                            
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${customer.name}</td>
+                                <td>${customer.contact}</td>
+                                <td>${customer.island}</td>
+                                <td>${customerOrders.length}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm view-orders" data-id="${customer.id}" data-name="${customer.name}">
+                                        <i class="fas fa-eye"></i> View Orders
+                                    </button>
+                                </td>
+                            `;
+                            customerTableBody.appendChild(row);
+                            
+                            // Add event listener to view orders button
+                            row.querySelector('.view-orders').addEventListener('click', function() {
+                                const customerId = this.dataset.id;
+                                const customerName = this.dataset.name;
+                                showCustomerOrders(customerId, customerName);
+                            });
+                        });
+                    });
+                });
+            }
+            
+            function showCustomerOrders(customerId, customerName) {
+                const modal = document.getElementById('customer-orders-modal');
+                const customerOrdersList = document.getElementById('customer-orders-list');
+                const modalCustomerName = document.getElementById('modal-customer-name');
+                
+                modalCustomerName.textContent = `Orders for ${customerName}`;
+                customerOrdersList.innerHTML = '<p>Loading orders...</p>';
+                
+                modal.style.display = 'block';
+                
+                getCustomerOrders(customerId, (orders) => {
+                    if (orders.length === 0) {
+                        customerOrdersList.innerHTML = '<p>No orders found for this customer.</p>';
+                        return;
+                    }
+                    
+                    customerOrdersList.innerHTML = '';
+                    
+                    orders.forEach(order => {
+                        const orderDate = new Date(order.date).toLocaleDateString();
+                        
+                        const orderCard = document.createElement('div');
+                        orderCard.className = 'trip-card';
+                        orderCard.innerHTML = `
+                            <div class="trip-header">
+                                <div class="trip-date">${orderDate}</div>
+                                <div class="trip-status ${order.paymentStatus === 'paid' ? 'status-paid' : 'status-unpaid'}">
+                                    ${order.paymentStatus.toUpperCase()}
+                                </div>
+                            </div>
+                            <div class="trip-products">
+                                <strong>Products:</strong>
+                                <ul>
+                                    ${order.products.map(product => `
+                                        <li>${product.productName} - ${product.qty} (${product.date} ${product.time})</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                            <div class="trip-actions">
+                                <button class="btn btn-primary btn-sm generate-invoice" data-id="${order.id}">
+                                    <i class="fas fa-file-pdf"></i> Generate Invoice
+                                </button>
+                                ${order.paymentStatus === 'unpaid' ? 
+                                    `<button class="btn btn-success btn-sm mark-paid" data-id="${order.id}">
+                                        <i class="fas fa-check"></i> Mark as Paid
+                                    </button>` : 
+                                    `<button class="btn btn-warning btn-sm mark-unpaid" data-id="${order.id}">
+                                        <i class="fas fa-times"></i> Mark as Unpaid
+                                    </button>`
+                                }
+                            </div>
+                        `;
+                        
+                        customerOrdersList.appendChild(orderCard);
+                        
+                        // Add event listeners
+                        orderCard.querySelector('.generate-invoice').addEventListener('click', function() {
+                            generateOrderInvoice(order);
+                        });
+                        
+                        if (order.paymentStatus === 'unpaid') {
+                            orderCard.querySelector('.mark-paid').addEventListener('click', function() {
+                                updateOrderPaymentStatus(order.id, 'paid');
+                                alert('Order marked as paid!');
+                                showCustomerOrders(customerId, customerName);
+                            });
+                        } else {
+                            orderCard.querySelector('.mark-unpaid').addEventListener('click', function() {
+                                updateOrderPaymentStatus(order.id, 'unpaid');
+                                alert('Order marked as unpaid!');
+                                showCustomerOrders(customerId, customerName);
+                            });
+                        }
+                    });
+                });
+            }
+            
+            function updateOrderPaymentStatus(orderId, status) {
+                database.ref('orders/' + orderId + '/paymentStatus').set(status);
+            }
+            
+            function generateOrderInvoice(order) {
+                // Get customer details
+                database.ref('customers/' + order.customerId).once('value').then((snapshot) => {
+                    const customer = snapshot.val();
+                    
+                    const doc = new jsPDF();
+                    
+                    // Add logo and header
+                    doc.setFontSize(20);
+                    doc.setTextColor(26, 42, 108);
+                    doc.text('NIYAAMAA BOAT', 105, 20, { align: 'center' });
+                    doc.setFontSize(16);
+                    doc.text('INVOICE', 105, 30, { align: 'center' });
+                    
+                    // Add invoice details
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Invoice ID: BT${order.id}`, 20, 45);
+                    doc.text(`Date: ${new Date(order.date).toLocaleDateString()}`, 20, 52);
+                    doc.text(`Island: ${customer.island}`, 20, 59);
+                    
+                    doc.text(`Customer: ${customer.name}`, 105, 45);
+                    doc.text(`Contact: ${customer.contact}`, 105, 52);
+                    doc.text(`Status: ${order.paymentStatus.toUpperCase()}`, 105, 59);
+                    
+                    // Add products table
+                    const tableColumn = ["Product", "Qty", "Date", "Time", "Description"];
+                    const tableRows = [];
+                    
+                    order.products.forEach(product => {
+                        const productData = [
+                            product.productName,
+                            product.qty,
+                            product.date,
+                            product.time,
+                            product.description || '-'
+                        ];
+                        tableRows.push(productData);
+                    });
+                    
+                    doc.autoTable({
+                        head: [tableColumn],
+                        body: tableRows,
+                        startY: 70,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [26, 42, 108],
+                            textColor: [255, 255, 255]
+                        }
+                    });
+                    
+                    // Add bank details
+                    const lastPage = doc.internal.getNumberOfPages();
+                    doc.setPage(lastPage);
+                    
+                    const finalY = doc.lastAutoTable.finalY + 15;
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(26, 42, 108);
+                    doc.text('BANK TRANSFER DETAILS', 20, finalY);
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text('Bank Name: Maldives Islamic Bank', 20, finalY + 7);
+                    doc.text('Account Name: RIHAAKURU ISLAND', 20, finalY + 14);
+                    doc.text('Account Number: 90101400028101002', 20, finalY + 21);
+                    doc.text(`Reference: BT${order.id} - ${customer.name}`, 20, finalY + 28);
+                    
+                    // Save the PDF
+                    doc.save(`Invoice_BT${order.id}_${customer.name}.pdf`);
+                });
+            }
+            
+            // Load payments for payment management
+            function loadPayments(filter) {
+                const paymentList = document.getElementById('payment-list');
+                
+                // Clear current list
+                paymentList.innerHTML = '';
+                
+                // Get orders and customers from Firebase
+                getOrders((orders) => {
+                    getCustomers((customers) => {
+                        // Filter orders based on payment status
+                        let filteredOrders = orders;
+                        if (filter !== 'all') {
+                            filteredOrders = orders.filter(order => order.paymentStatus === filter);
+                        }
+                        
+                        if (filteredOrders.length === 0) {
+                            paymentList.innerHTML = '<p>No payments found.</p>';
+                            return;
+                        }
+                        
+                        // Create payment items
+                        filteredOrders.forEach(order => {
+                            const customer = customers.find(c => c.id == order.customerId);
+                            
+                            if (!customer) return;
+                            
+                            const paymentItem = document.createElement('div');
+                            paymentItem.className = 'payment-item';
+                            
+                            // Format date
+                            const orderDate = new Date(order.date).toLocaleDateString();
+                            
+                            paymentItem.innerHTML = `
+                                <div class="payment-info">
+                                    <p><strong>${customer.name}</strong> - ${customer.island} (${orderDate})</p>
+                                    <p>${order.products.length} products</p>
+                                </div>
+                                <div class="payment-actions">
+                                    <span class="trip-status ${order.paymentStatus === 'paid' ? 'status-paid' : 'status-unpaid'}">
+                                        ${order.paymentStatus.toUpperCase()}
+                                    </span>
+                                    <button class="btn btn-primary btn-sm view-payment" data-id="${order.id}">View</button>
+                                </div>
+                            `;
+                            
+                            paymentList.appendChild(paymentItem);
+                            
+                            // Add event listener to view button
+                            paymentItem.querySelector('.view-payment').addEventListener('click', function() {
+                                // Switch to POS tab and show the customer orders
+                                document.querySelector('[data-tab="pos"]').click();
+                                showCustomerOrders(order.customerId, customer.name);
+                            });
+                        });
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
